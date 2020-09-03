@@ -16,16 +16,18 @@ class User extends Contract {
         if(params.length !== count) throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`);
     }
 
-    getCreatorId(ctx) {
-        const clientId = ctx.clientIdentity.id;
-        const mspId = ctx.clientIdentity.mspId;
-        const id = `${mspId}::${clientId}`;
-        return id;
+    async getCreatorId(ctx) {
+        const rawId = await ctx.stub.invokeChaincode("helper", ["getCreatorId"], "mychannel");
+        if (rawId.status !== 200) throw new Error(rawId.message);
+        
+        return rawId.payload.toString('utf8');
     }
 
-    getTimestamp(ctx) {
-        const timestamp = ctx.stub.getTxTimestamp();
-        return `${timestamp.seconds}${timestamp.nanos}`;
+    async getTimestamp(ctx) {
+        const rawTs = await ctx.stub.invokeChaincode("helper", ["getTimestamp"], "mychannel");
+        if (rawTs.status !== 200) throw new Error(rawId.message);
+        
+        return rawTs.payload.toString('utf8');
     }
 
     async getAllResults(iterator, isHistory, limit = 0) {
@@ -62,7 +64,7 @@ class User extends Contract {
     }
     
     async setLastJobAttributionNow(ctx, workers) {
-        const timestamp = this.getTimestamp(ctx);
+        const timestamp = await this.getTimestamp(ctx);
         let promises = [];
         
         workers.forEach(w => {
@@ -80,7 +82,7 @@ class User extends Contract {
         this.validateParams(params, 1);
 
         const count = params[0];
-        const id = this.getCreatorId(ctx);
+        const id = await this.getCreatorId(ctx);
         let workersIds = [];
         let workers = [];
         // select KYC workers
@@ -127,8 +129,9 @@ class User extends Contract {
         const existing = await ctx.stub.getStateByPartialCompositeKey('username~id', [params[0]]);
         if(existing.response.results.length > 0) throw new Error(`${params[0]} is already taken.`);
 
-        const id = this.getCreatorId(ctx)
-        const registryDate = this.getTimestamp(ctx);
+        const id = await this.getCreatorId(ctx);
+
+        const registryDate = await this.getTimestamp(ctx);
 
         const value = {
             username: params[0],

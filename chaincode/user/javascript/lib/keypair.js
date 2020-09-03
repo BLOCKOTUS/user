@@ -16,11 +16,18 @@ class Keypair extends Contract {
         if(params.length !== count) throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`);
     }
 
-    getCreatorId(ctx) {
-        let clientId = ctx.clientIdentity.id;
-        let mspId = ctx.clientIdentity.mspId;
-        let id = `${mspId}::${clientId}`;
-        return id;
+    async getCreatorId(ctx) {
+        const rawId = await ctx.stub.invokeChaincode("helper", ["getCreatorId"], "mychannel");
+        if (rawId.status !== 200) throw new Error(rawId.message);
+        
+        return rawId.payload.toString('utf8');
+    }
+
+    async getTimestamp(ctx) {
+        const rawTs = await ctx.stub.invokeChaincode("helper", ["getTimestamp"], "mychannel");
+        if (rawTs.status !== 200) throw new Error(rawId.message);
+        
+        return rawTs.payload.toString('utf8');
     }
     
     // @ params[0]: sharedWith { ...userId: { keyPair } } // stringified
@@ -32,7 +39,7 @@ class Keypair extends Contract {
         let params = args.params;
         this.validateParams(params, 4);
 
-        const id = this.getCreatorId(ctx);
+        const id = await this.getCreatorId(ctx);
         const sharedKeyPairId = `${params[3]}||${id}||${params[1]}`;
         const compositeKey = await ctx.stub.createCompositeKey('id~groupId~type', [id, params[1], params[3]]);
         const compositeKeyReverse = await ctx.stub.createCompositeKey('groupId~id~type', [params[1], id], params[3]);
@@ -68,7 +75,7 @@ class Keypair extends Contract {
         let params = args.params;
         this.validateParams(params, 1);
 
-        const id = this.getCreatorId(ctx);
+        const id = await this.getCreatorId(ctx);
         const sharedKeyPairId = params[0]; 
         
         const rawKeypairObject = await ctx.stub.getState(sharedKeyPairId);
