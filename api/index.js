@@ -18,15 +18,18 @@ async function create({
 }) {
 	return new Promise(async (resolve, reject) => {
 		// create wallet file here
-		await registerUser.main(username).catch(reject);
-		
+		const user = await registerUser.main(username).catch(reject);
+    if (!user) return;
+    
 		// get identity
 		const wallet = JSON.parse(fs.readFileSync(path.join(WALLET_PATH, `${username}.id`)));
 	
 		// register username
 		const {contract, gateway} = await 
 			getContractAndGateway({username, chaincode: 'user', contract: 'User'})
-				.catch(reject);
+        .catch(reject);
+    
+    if (!contract || !gateway) return;
 
 		const id = await 
 			contract
@@ -35,8 +38,10 @@ async function create({
 		
 		await gateway.disconnect();
 
+    if (!id) return;
+    
+    console.log('Transaction has been submitted', response);
 		resolve({wallet, id: id.toString()});
-
 		return;
 	})
 }
@@ -56,17 +61,20 @@ async function shareKeypair({
 		// get contract, submit transaction and disconnect
 		var {contract, gateway} = await 
 			getContractAndGateway({username: user.username, chaincode: 'user', contract: 'Keypair'})
-				.catch(reject);
+        .catch(reject);
+        
+    if (!contract || !gateway) return;
 
 		var response = await 
 			contract
 				.submitTransaction('createSharedKeypair', JSON.stringify(sharedWith), groupId, myEncryptedKeyPair, type)
-				.catch(reject);
+        .catch(reject);    
 
-		console.log('Transaction has been submitted', response);
+    await gateway.disconnect();
+    
+    if (!response) return;
 
-		await gateway.disconnect();
-	
+    console.log('Transaction has been submitted', response);
 		resolve();
 		return;
 	})
@@ -84,23 +92,26 @@ async function getKeypair({
 		// get contract, submit transaction and disconnect
 		var {contract, gateway} = await 
 			getContractAndGateway({username: user.username, chaincode: 'user', contract: 'Keypair'})
-				.catch(reject);
+        .catch(reject);
+        
+    if (!contract || !gateway) return;
 
 		// submit transaction
 		const rawKeypair = await 
 			contract
 				.submitTransaction('getKeypair', keypairId)
-				.catch(reject);
+        .catch(reject);
+        
+    //disconnect
+    await gateway.disconnect();
+
+    if (!rawKeypair) return;
 
 		const keypair = JSON.parse(rawKeypair.toString('utf8'))
 
 		console.log('Transaction has been submitted');
-		
-		//disconnect
-		await gateway.disconnect();
-
 		resolve(keypair);
-		return;
+    return;
 	})
 }
 
