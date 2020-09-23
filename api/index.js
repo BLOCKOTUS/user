@@ -40,7 +40,7 @@ async function create({
 
     if (!id) return;
     
-    console.log('Transaction has been submitted', response);
+    console.log('Transaction has been submitted');
 		resolve({wallet, id: id.toString()});
 		return;
 	})
