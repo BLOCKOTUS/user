@@ -8,7 +8,7 @@ const { Contract } = require('fabric-contract-api');
 
 class Keypair extends Contract {
 
-    async initLedger(ctx) {
+    async initLedger() {
       
     }
 
@@ -25,7 +25,7 @@ class Keypair extends Contract {
 
     async getTimestamp(ctx) {
         const rawTs = await ctx.stub.invokeChaincode("helper", ["getTimestamp"], "mychannel");
-        if (rawTs.status !== 200) throw new Error(rawId.message);
+        if (rawTs.status !== 200) throw new Error(rawTs.message);
         
         return rawTs.payload.toString('utf8');
     }
@@ -47,15 +47,15 @@ class Keypair extends Contract {
         let existing = await ctx.stub.getState(sharedKeyPairId);
         if(!existing.toString()){
             const sharedWith = JSON.parse(params[0]);
-            console.log(JSON.stringify(sharedWith))
+            console.log(JSON.stringify(sharedWith));
             let value = {};
             value[id] = {keyPair: params[2], isCreator: true};
     
             for(let eUserId in sharedWith){
                 value[eUserId] = {
                     keyPair: sharedWith[eUserId].keyPair,
-                    isCreator: false
-                }
+                    isCreator: false,
+                };
             }
     
             await ctx.stub.putState(sharedKeyPairId, Buffer.from(JSON.stringify(value)));

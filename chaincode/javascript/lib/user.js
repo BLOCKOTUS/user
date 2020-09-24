@@ -8,7 +8,7 @@ const { Contract } = require('fabric-contract-api');
 
 class User extends Contract {
 
-    async initLedger(ctx) {
+    async initLedger() {
       
     }
 
@@ -25,7 +25,7 @@ class User extends Contract {
 
     async getTimestamp(ctx) {
         const rawTs = await ctx.stub.invokeChaincode("helper", ["getTimestamp"], "mychannel");
-        if (rawTs.status !== 200) throw new Error(rawId.message);
+        if (rawTs.status !== 200) throw new Error(rawTs.message);
         
         return rawTs.payload.toString('utf8');
     }
@@ -68,10 +68,11 @@ class User extends Contract {
         let promises = [];
         
         workers.forEach(w => {
-            let updatedWorker = {...w.Record, lastJobAttribution: timestamp}
+            let updatedWorker = {...w.Record, lastJobAttribution: timestamp};
             promises.push(ctx.stub.putState(w.Key, Buffer.from(JSON.stringify(updatedWorker))));
-        })
+        });
 
+        /* eslint-disable-next-line no-undef */
         return Promise.all(promises);
     }
 
@@ -95,7 +96,7 @@ class User extends Contract {
             };
             queryString.sort = [
                 {"lastJobAttribution": "asc"}, 
-                {"registryDate": "asc"}
+                {"registryDate": "asc"},
             ];
             
             let limit = Number(count) - workersIds.length;
@@ -106,7 +107,7 @@ class User extends Contract {
             const resultsIterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
             const workersNonKyc = await this.getAllResults(resultsIterator, false, limit);
 
-            console.log('===== workersNonKyc COUNT =====', workersNonKyc.length)
+            console.log('===== workersNonKyc COUNT =====', workersNonKyc.length);
             
             workersIds = workersIds.concat(workersNonKyc.map(w => ({_id: w.Key, publicKey: w.Record.publicKey})));
             workers = workers.concat(workersNonKyc);
@@ -114,7 +115,7 @@ class User extends Contract {
         
         await this.setLastJobAttributionNow(ctx, workers);
 
-        console.log('=== wordersIds ===', JSON.stringify(workersIds))
+        console.log('=== wordersIds ===', JSON.stringify(workersIds));
         return workersIds;
     }
     
@@ -138,18 +139,18 @@ class User extends Contract {
             registryDate: Number(registryDate),
             publicKey: params[1],
             lastJobAttribution: 0,
-            kyc: false
-        }
+            kyc: false,
+        };
 
         // put state
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(value)));
         
         // create a composite key for easier search
-        const indexUsername = await ctx.stub.createCompositeKey('username~id', [value.username, id])
+        const indexUsername = await ctx.stub.createCompositeKey('username~id', [value.username, id]);
         await ctx.stub.putState(indexUsername, Buffer.from('\u0000'));
         
         // create a composite key for easier search
-        const indexRegistryDate = await ctx.stub.createCompositeKey('registryDate~id', [registryDate, id])
+        const indexRegistryDate = await ctx.stub.createCompositeKey('registryDate~id', [registryDate, id]);
         await ctx.stub.putState(indexRegistryDate, Buffer.from('\u0000'));
 
         console.info(`=== created user ${JSON.stringify(value)} ===`);

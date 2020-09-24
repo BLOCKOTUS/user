@@ -14,8 +14,9 @@ const WALLET_PATH = path.join(__dirname, '..', '..', '..', 'wallet');
 
 async function create({
 	username,
-	publicKey
+	publicKey,
 }) {
+	/* eslint-disable-next-line no-undef */ /* eslint-disable-next-line no-async-promise-executor */ 
 	return new Promise(async (resolve, reject) => {
 		// create wallet file here
 		const user = await registerUser.main(username).catch(reject);
@@ -43,7 +44,7 @@ async function create({
     console.log('Transaction has been submitted');
 		resolve({wallet, id: id.toString()});
 		return;
-	})
+	});
 }
 
 async function shareKeypair({
@@ -51,12 +52,13 @@ async function shareKeypair({
 	groupId,
 	myEncryptedKeyPair,
 	type,
-	user
+	user,
 }) {
+	/* eslint-disable-next-line no-undef */ /* eslint-disable-next-line no-async-promise-executor */ 
 	return new Promise(async (resolve, reject) => {
 		// create wallet
 		const walletPath = path.join(WALLET_PATH, `${user.username}.id`);
-		fs.writeFileSync(walletPath, JSON.stringify(user.wallet))
+		fs.writeFileSync(walletPath, JSON.stringify(user.wallet));
 
 		// get contract, submit transaction and disconnect
 		var {contract, gateway} = await 
@@ -77,17 +79,18 @@ async function shareKeypair({
     console.log('Transaction has been submitted', response);
 		resolve();
 		return;
-	})
+	});
 }
 
 async function getKeypair({
 	keypairId,
-	user
+	user,
 }) {
+	/* eslint-disable-next-line no-undef */ /* eslint-disable-next-line no-async-promise-executor */ 
 	return new Promise(async (resolve, reject) => {
 		// create wallet
 		const walletPath = path.join(WALLET_PATH, `${user.username}.id`);
-		fs.writeFileSync(walletPath, JSON.stringify(user.wallet))
+		fs.writeFileSync(walletPath, JSON.stringify(user.wallet));
 
 		// get contract, submit transaction and disconnect
 		var {contract, gateway} = await 
@@ -107,16 +110,16 @@ async function getKeypair({
 
     if (!rawKeypair) return;
 
-		const keypair = JSON.parse(rawKeypair.toString('utf8'))
+		const keypair = JSON.parse(rawKeypair.toString('utf8'));
 
 		console.log('Transaction has been submitted');
 		resolve(keypair);
     return;
-	})
+	});
 }
 
 module.exports = {
 	create,
 	shareKeypair,
-	getKeypair
-}
+	getKeypair,
+};
