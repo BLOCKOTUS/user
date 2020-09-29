@@ -30,7 +30,7 @@ class Keypair extends Contract {
         return rawTs.payload.toString('utf8');
     }
     
-    // @ params[0]: sharedWith { ...userId: { keyPair } } // stringified
+    // @ params[0]: sharedWith { ...userId: { keypair } } // stringified
     // @ params[1]: groupId
     // @ params[2]: myEncryptedKeyPair
     // @ params[3]: type = 'job'
@@ -49,11 +49,11 @@ class Keypair extends Contract {
             const sharedWith = JSON.parse(params[0]);
             console.log(JSON.stringify(sharedWith));
             let value = {};
-            value[id] = {keyPair: params[2], isCreator: true};
+            value[id] = {keypair: params[2], isCreator: true};
     
             for(let eUserId in sharedWith){
                 value[eUserId] = {
-                    keyPair: sharedWith[eUserId].keyPair,
+                    keypair: sharedWith[eUserId].keypair,
                     isCreator: false,
                 };
             }
@@ -89,7 +89,7 @@ class Keypair extends Contract {
 
         console.info(`=== keypair ${JSON.stringify(keypairObject[id])} ===`);
 
-        return keypairObject[id].keyPair;
+        return keypairObject[id].keypair;
     }
 
 }
