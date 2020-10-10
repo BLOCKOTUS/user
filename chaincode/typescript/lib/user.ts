@@ -61,11 +61,11 @@ export class User extends Contract {
         return rawId.payload.toString();
     }
 
-    private async getTimestamp(ctx: Contextx) {
+    private async getTimestamp(ctx: Context) {
         const rawTs = await ctx.stub.invokeChaincode('helper', ['getTimestamp'], 'mychannel');
         if (rawTs.status !== 200) { throw new Error(rawTs.message); }
 
-        return rawTs.payload.toString('utf8');
+        return rawTs.payload.toString();
     }
 
     private async getAllResults(iterator, isHistory, limit = 0) {

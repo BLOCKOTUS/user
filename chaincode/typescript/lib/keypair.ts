@@ -12,7 +12,7 @@ export class Keypair extends Contract {
         console.log('initLedger');
     }
 
-    // @ params[0]: sharedWith { ...userId: { keyPair } } // stringified
+    // @ params[0]: sharedWith { ...userId: { keypair } } // stringified
     // @ params[1]: groupId
     // @ params[2]: myEncryptedKeyPair
     // @ params[3]: type = 'job'
@@ -30,13 +30,13 @@ export class Keypair extends Contract {
         if (!existing.toString()) {
             const sharedWith = JSON.parse(params[0]);
             const value = {};
-            value[id] = {keyPair: params[2], isCreator: true};
+            value[id] = {keypair: params[2], isCreator: true};
 
             for (const eUserId in sharedWith) {
                 if (sharedWith.hasOwnProperty(eUserId)) {
                     value[eUserId] = {
                         isCreator: false,
-                        keyPair: sharedWith[eUserId].keyPair,
+                        keypair: sharedWith[eUserId].keypair,
                     };
                 }
             }
@@ -71,7 +71,7 @@ export class Keypair extends Contract {
 
         console.info(`=== keypair ${JSON.stringify(keypairObject[id])} ===`);
 
-        return keypairObject[id].keyPair;
+        return keypairObject[id].keypair;
     }
 
     private validateParams(params, count) {
