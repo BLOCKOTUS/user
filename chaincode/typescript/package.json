@@ -1,5 +1,5 @@
 {
-    "name": "blockotus-organ-use-chaincode",
+    "name": "blockotus-organ-use-chaincode-typescript",
     "version": "0.1.7-beta",
     "description": "use chaincode implemented in node.js",
     "main": "dist/index.js",
