@@ -7,7 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const registerUser = require('../../admins/registerUser');
+const registerUser = require('../../../tools/admins/registerUser');
 const { getContractAndGateway } = require('../../helper/api');
 
 const WALLET_PATH = path.join(__dirname, '..', '..', '..', 'wallet');
