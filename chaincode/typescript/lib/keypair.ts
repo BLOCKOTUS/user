@@ -24,7 +24,7 @@ export class Keypair extends Contract {
         const id = await this.getCreatorId(ctx);
         const sharedKeyPairId = `${params[3]}||${id}||${params[1]}`;
         const compositeKey = await ctx.stub.createCompositeKey('id~groupId~type', [id, params[1], params[3]]);
-        const compositeKeyReverse = await ctx.stub.createCompositeKey('groupId~id~type', [params[1], id], params[3]);
+        const compositeKeyReverse = await ctx.stub.createCompositeKey('groupId~id~type', [params[1], id, params[3]]);
 
         const existing = await ctx.stub.getState(sharedKeyPairId);
         if (!existing.toString()) {
