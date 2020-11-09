@@ -1,12 +1,9 @@
 import fs from 'fs';
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import path from 'path';
 
 import * as registerUser from '../../../tools/admins/dist/registerUser.js';
-import { getContractAndGateway } from '../../helper/api/index.js';
+import { getContractAndGateway } from '../../helper/api/index.minified.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const WALLET_PATH = path.join(__dirname, '..', '..', '..', 'wallet');
 
 export const create = async ({
