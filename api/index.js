@@ -1,22 +1,18 @@
-/*
- * SPDX-License-Identifier: Apache-2.0
- */
+import fs from 'fs';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-'use strict';
+import * as registerUser from '../../../tools/admins/registerUser.js';
+import { getContractAndGateway } from '../../helper/api/index.js';
 
-const fs = require('fs');
-const path = require('path');
-
-const registerUser = require('../../../tools/admins/registerUser');
-const { getContractAndGateway } = require('../../helper/api');
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const WALLET_PATH = path.join(__dirname, '..', '..', '..', 'wallet');
 
-async function create({
+export const create = async ({
 	username,
 	publicKey,
-}) {
-	/* eslint-disable-next-line no-undef */ /* eslint-disable-next-line no-async-promise-executor */ 
+}) => {
 	return new Promise(async (resolve, reject) => {
 		// create wallet file here
 		const user = await registerUser.main(username).catch(reject);
@@ -45,16 +41,15 @@ async function create({
 		resolve({wallet, id: id.toString()});
 		return;
 	});
-}
+};
 
-async function shareKeypair({
+export const shareKeypair = async ({
 	sharedWith,
 	groupId,
 	myEncryptedKeyPair,
 	type,
 	user,
-}) {
-	/* eslint-disable-next-line no-undef */ /* eslint-disable-next-line no-async-promise-executor */ 
+}) => {
 	return new Promise(async (resolve, reject) => {
 		// create wallet
 		const walletPath = path.join(WALLET_PATH, `${user.username}.id`);
@@ -80,13 +75,12 @@ async function shareKeypair({
 		resolve();
 		return;
 	});
-}
+};
 
-async function getKeypair({
+export const getKeypair = async ({
 	keypairId,
 	user,
-}) {
-	/* eslint-disable-next-line no-undef */ /* eslint-disable-next-line no-async-promise-executor */ 
+}) => {
 	return new Promise(async (resolve, reject) => {
 		// create wallet
 		const walletPath = path.join(WALLET_PATH, `${user.username}.id`);
@@ -116,10 +110,4 @@ async function getKeypair({
 		resolve(keypair);
     return;
 	});
-}
-
-module.exports = {
-	create,
-	shareKeypair,
-	getKeypair,
 };
