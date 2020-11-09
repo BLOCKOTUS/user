@@ -2,7 +2,7 @@ import fs from 'fs';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-import * as registerUser from '../../../tools/admins/registerUser.js';
+import * as registerUser from '../../../tools/admins/dist/registerUser.js';
 import { getContractAndGateway } from '../../helper/api/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
