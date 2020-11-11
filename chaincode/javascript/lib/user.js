@@ -12,10 +12,20 @@ class User extends Contract {
       
     }
 
+    /**
+     * Validate the params received as arguments by a public functions.
+     * Params are stored in the Context.
+     * 
+     * @param {string[]} params params received by a pubic function
+     * @param {number} count number of params expected
+     */
     validateParams(params, count) {
         if(params.length !== count) throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`);
     }
 
+    /**
+     * Get the creatorId (transaction submitter unique id) from the Helper organ.
+     */
     async getCreatorId(ctx) {
         const rawId = await ctx.stub.invokeChaincode("helper", ["getCreatorId"], "mychannel");
         if (rawId.status !== 200) throw new Error(rawId.message);
@@ -23,6 +33,9 @@ class User extends Contract {
         return rawId.payload.toString('utf8');
     }
 
+    /**
+     * Get the timestamp from the Helper organ.
+     */
     async getTimestamp(ctx) {
         const rawTs = await ctx.stub.invokeChaincode("helper", ["getTimestamp"], "mychannel");
         if (rawTs.status !== 200) throw new Error(rawTs.message);
@@ -30,20 +43,28 @@ class User extends Contract {
         return rawTs.payload.toString('utf8');
     }
 
+    /**
+     * Retrieve results from an interator.
+     * Construct an array, and can respect a length limit.
+     */
     async getAllResults(iterator, isHistory, limit = 0) {
 		let allResults = [];
 		let res = await iterator.next();
 		while (!res.done || (allResults.length < limit && limit > 0)) {
 			if (res.value && res.value.value.toString()) {
-				let jsonRes = {};
-				console.log(res.value.value.toString('utf8'));
+				const jsonRes = {
+                    Key: null,
+                    TxId: null,
+                    Timestamp: null,
+                    Value: null,
+                    Record: null,
+                };
 				if (isHistory && isHistory === true) {
 					jsonRes.TxId = res.value.tx_id;
 					jsonRes.Timestamp = res.value.timestamp;
 					try {
 						jsonRes.Value = JSON.parse(res.value.value.toString('utf8'));
 					} catch (err) {
-						console.log(err);
 						jsonRes.Value = res.value.value.toString('utf8');
 					}
 				} else {
@@ -51,7 +72,6 @@ class User extends Contract {
 					try {
 						jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
 					} catch (err) {
-						console.log(err);
 						jsonRes.Record = res.value.value.toString('utf8');
 					}
 				}
@@ -63,20 +83,25 @@ class User extends Contract {
 		return allResults;
     }
     
+    /**
+     * Update an array of users object and set the `lastJobAttribution` as of now.
+     */
     async setLastJobAttributionNow(ctx, workers) {
         const timestamp = await this.getTimestamp(ctx);
         let promises = [];
         
         workers.forEach(w => {
+            // create a new object with the update `lastJobAttribution` value, then put it on the ledger
             let updatedWorker = {...w.Record, lastJobAttribution: timestamp};
             promises.push(ctx.stub.putState(w.Key, Buffer.from(JSON.stringify(updatedWorker))));
         });
 
-        /* eslint-disable-next-line no-undef */
         return Promise.all(promises);
     }
 
-    // params[0]: count
+    /**
+     * Select users that will be affected to a job.
+     */
     async getNextWorkersIds(ctx) {
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
@@ -86,42 +111,43 @@ class User extends Contract {
         const id = await this.getCreatorId(ctx);
         let workersIds = [];
         let workers = [];
-        // select KYC workers
+
+        // TODO: select KYC workers
 
         // select non-KYC workers
-        if(workersIds.length < count){
-            let queryString = {};
-            queryString.selector = {
-                "$not": {"_id": id},
+        if (workersIds.length < count) {
+            const queryString = {
+                selector: {
+                    $not: { _id: id },
+                },
+                sort: [
+                    { lastJobAttribution: 'asc' },
+                    { registryDate: 'asc' },
+                ],
             };
-            queryString.sort = [
-                {"lastJobAttribution": "asc"}, 
-                {"registryDate": "asc"},
-            ];
-            
-            let limit = Number(count) - workersIds.length;
+
+            const limit = count - workersIds.length;
 
             // Paginated queries are supported only in a read-only transaction
             // const results = await ctx.stub.getQueryResultWithPagination(JSON.stringify(queryString), limit);
-
             const resultsIterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
             const workersNonKyc = await this.getAllResults(resultsIterator, false, limit);
 
-            console.log('===== workersNonKyc COUNT =====', workersNonKyc.length);
-            
-            workersIds = workersIds.concat(workersNonKyc.map(w => ({_id: w.Key, publicKey: w.Record.publicKey})));
+            workersIds = workersIds.concat(workersNonKyc.map((w) => ({_id: w.Key, publicKey: w.Record.publicKey})));
             workers = workers.concat(workersNonKyc);
         }
         
         await this.setLastJobAttributionNow(ctx, workers);
 
-        console.log('=== wordersIds ===', JSON.stringify(workersIds));
         return workersIds;
     }
     
-    // PARAMS
-    // @ params[0]: username
-    // @ params[1]: pubKey
+    /**
+     * Create a user.
+     * 
+     * @param username
+     * @param pubKey
+     */
     async createUser(ctx) {
         const args = ctx.stub.getFunctionAndParameters();
         const params = args.params;
@@ -130,10 +156,9 @@ class User extends Contract {
         const existing = await ctx.stub.getStateByPartialCompositeKey('username~id', [params[0]]);
         if(existing.response.results.length > 0) throw new Error(`${params[0]} is already taken.`);
 
+        // construct user object
         const id = await this.getCreatorId(ctx);
-
         const registryDate = await this.getTimestamp(ctx);
-
         const value = {
             username: params[0],
             registryDate: Number(registryDate),
@@ -153,8 +178,6 @@ class User extends Contract {
         const indexRegistryDate = await ctx.stub.createCompositeKey('registryDate~id', [registryDate, id]);
         await ctx.stub.putState(indexRegistryDate, Buffer.from('\u0000'));
 
-        console.info(`=== created user ${JSON.stringify(value)} ===`);
-        
         return id;
     }
 }

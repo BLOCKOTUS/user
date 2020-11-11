@@ -6,6 +6,10 @@ import { getContractAndGateway } from '../../helper/api/index.minified.js';
 
 const WALLET_PATH = path.join(__dirname, '..', '..', '..', 'wallet');
 
+/**
+ * Creates a user on the network.
+ * Each user has a `username` and a `publicKey`.
+ */
 export const create = async ({
 	username,
 	publicKey,
@@ -40,6 +44,9 @@ export const create = async ({
 	});
 };
 
+/**
+ * Store a `Keypair` and eventually make it readable by other users.
+ */
 export const shareKeypair = async ({
 	sharedWith,
 	groupId,
@@ -74,6 +81,9 @@ export const shareKeypair = async ({
 	});
 };
 
+/**
+ * Retrieve a `Keypair` from the network.
+ */
 export const getKeypair = async ({
 	keypairId,
 	user,
