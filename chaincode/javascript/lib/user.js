@@ -154,7 +154,8 @@ class User extends Contract {
         this.validateParams(params, 2);
 
         const existing = await ctx.stub.getStateByPartialCompositeKey('username~id', [params[0]]);
-        if(existing.response.results.length > 0) throw new Error(`${params[0]} is already taken.`);
+        const response = await existing.next();
+        if (!response.done) { throw new Error(`${params[0]} already exists.`); }
 
         // construct user object
         const id = await this.getCreatorId(ctx);
