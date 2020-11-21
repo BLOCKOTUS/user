@@ -5,6 +5,7 @@
 'use strict';
 
 import { Context, Contract } from 'fabric-contract-api';
+import type { ParsedDIDUrl } from '../../../types';
 
 export class User extends Contract {
 
@@ -15,8 +16,9 @@ export class User extends Contract {
     /**
      * Create a user.
      * 
-     * @param username
-     * @param pubKey
+     * @param {Context} ctx
+     * @arg username
+     * @arg pubKey
      */
     public async createUser(ctx: Context) {
         const args = ctx.stub.getFunctionAndParameters();
@@ -53,13 +55,61 @@ export class User extends Contract {
     }
 
     /**
+     * Get a user.
+     * 
+     * @param {Context} ctx
+     * @arg {string} key
+     */
+    public async getUser(ctx: Context): Promise<string> {
+        const args = ctx.stub.getFunctionAndParameters();
+        const params = args.params;
+        this.validateParams(params, 1);
+
+        // get userId from function argument
+        const userId = params[0];
+
+        // get user
+        const user = await this.getUserById(ctx, userId);
+
+        return JSON.stringify(user).toString();
+    }
+
+    /**
+     * Executes a did request.
+     */
+    public async didRequest(ctx: Context, subject: string, method: string, data: string): Promise<any> {
+        const parsedSubject: { organ: string, organSpecificId: string } = JSON.parse(subject);
+        const parsedData: any =  data.length > 0 ? JSON.parse(data) : null;
+        switch(method){
+            case 'GET':
+                // get user
+                const user = await this.getUserById(ctx, parsedSubject.organSpecificId);
+                return user;
+                break;
+        }
+    }
+
+    /**
+     * Get an user by userId.
+     * 
+     * @param {string} id userId
+     */
+    private async getUserById(ctx: Context, id: string): Promise<string> {
+        const rawUser = await ctx.stub.getState(id);
+        if (!rawUser || rawUser.length === 0) { throw new Error(`${id} does not exist`); }
+
+        const user = rawUser.toString();
+        return user;
+    }
+
+    /**
      * Validate the params received as arguments by a public functions.
      * Params are stored in the Context.
      * 
      * @param {string[]} params params received by a pubic function
      * @param {number} count number of params expected
      */
-    private validateParams(params, count) {
+    private validateParams(params: Array<string>, count: number) {
         if (params.length !== count) { throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`); }
     }
 
