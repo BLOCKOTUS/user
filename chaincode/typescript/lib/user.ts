@@ -5,7 +5,7 @@
 'use strict';
 
 import { Context, Contract } from 'fabric-contract-api';
-import type { ParsedDIDUrl } from '../../../types';
+import type { DidDocumentConstructor, UserType } from '../../../types';
 
 export class User extends Contract {
 
@@ -33,8 +33,7 @@ export class User extends Contract {
         const id = await this.getCreatorId(ctx);
         const registryDate = await this.getTimestamp(ctx);
         const value = {
-            kyc: false,
-            lastJobAttribution: 0,
+            lastJobAttribution: Number(0),
             publicKey: params[1],
             registryDate: Number(registryDate),
             username: params[0],
@@ -77,14 +76,19 @@ export class User extends Contract {
     /**
      * Executes a did request.
      */
-    public async didRequest(ctx: Context, subject: string, method: string, data: string): Promise<any> {
+    public async didRequest(ctx: Context, subject: string, method: string, data: string): Promise<string> {
         const parsedSubject: { organ: string, organSpecificId: string } = JSON.parse(subject);
         const parsedData: any =  data.length > 0 ? JSON.parse(data) : null;
+
         switch(method){
             case 'GET':
                 // get user
-                const user = await this.getUserById(ctx, parsedSubject.organSpecificId);
-                return user;
+                const rawUser = await this.getUserById(ctx, parsedSubject.organSpecificId);
+                const user: UserType = JSON.parse(rawUser);
+                return JSON.stringify({
+                    subject: parsedSubject,
+                    blockotus: user,
+                });
                 break;
         }
     }
@@ -182,7 +186,7 @@ export class User extends Contract {
 
         workers.forEach((w) => {
             // create a new object with the update `lastJobAttribution` value, then put it on the ledger
-            const updatedWorker = {...w.Record, lastJobAttribution: timestamp};
+            const updatedWorker = {...w.Record, lastJobAttribution: Number(timestamp)};
             promises.push(ctx.stub.putState(w.Key, Buffer.from(JSON.stringify(updatedWorker))));
         });
 
