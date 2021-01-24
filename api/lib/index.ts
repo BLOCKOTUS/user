@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
-import * as registerUser from '../../../tools/admins/dist/registerUser.js';
-import { getContractAndGateway } from '../../helper/api/index.minified.js';
+import * as registerUser from '../../../../tools/admins/dist/registerUser.js';
+import { getContractAndGateway } from '../../../helper/api/dist/index.js';
 
-const WALLET_PATH = path.join(__dirname, '..', '..', '..', 'wallet');
+const WALLET_PATH = path.join(__dirname, '..', '..', '..', '..', 'wallet');
 
 /**
  * Creates a user on the network.

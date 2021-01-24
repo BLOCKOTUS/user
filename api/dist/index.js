@@ -23,9 +23,9 @@ var _fs = _interopRequireDefault(require("fs"));
 
 var _path = _interopRequireDefault(require("path"));
 
-var registerUser = _interopRequireWildcard(require("../../../tools/admins/dist/registerUser.js"));
+var registerUser = _interopRequireWildcard(require("../../../../tools/admins/dist/registerUser.js"));
 
-var _indexMinified = require("../../helper/api/index.minified.js");
+var _index = require("../../../helper/api/dist/index.js");
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
@@ -37,7 +37,12 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var WALLET_PATH = _path["default"].join(__dirname, '..', '..', '..', 'wallet');
+var WALLET_PATH = _path["default"].join(__dirname, '..', '..', '..', '..', 'wallet');
+/**
+ * Creates a user on the network.
+ * Each user has a `username` and a `publicKey`.
+ */
+
 
 var create = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(_ref) {
@@ -73,7 +78,7 @@ var create = /*#__PURE__*/function () {
                         wallet = JSON.parse(_fs["default"].readFileSync(_path["default"].join(WALLET_PATH, "".concat(username, ".id")))); // register username
 
                         _context.next = 8;
-                        return (0, _indexMinified.getContractAndGateway)({
+                        return (0, _index.getContractAndGateway)({
                           username: username,
                           chaincode: 'user',
                           contract: 'User'
@@ -141,6 +146,10 @@ var create = /*#__PURE__*/function () {
     return _ref2.apply(this, arguments);
   };
 }();
+/**
+ * Store a `Keypair` and eventually make it readable by other users.
+ */
+
 
 exports.create = create;
 
@@ -167,7 +176,7 @@ var shareKeypair = /*#__PURE__*/function () {
 
 
                         _context3.next = 4;
-                        return (0, _indexMinified.getContractAndGateway)({
+                        return (0, _index.getContractAndGateway)({
                           username: user.username,
                           chaincode: 'user',
                           contract: 'Keypair'
@@ -232,6 +241,10 @@ var shareKeypair = /*#__PURE__*/function () {
     return _ref5.apply(this, arguments);
   };
 }();
+/**
+ * Retrieve a `Keypair` from the network.
+ */
+
 
 exports.shareKeypair = shareKeypair;
 
@@ -258,7 +271,7 @@ var getKeypair = /*#__PURE__*/function () {
 
 
                         _context5.next = 4;
-                        return (0, _indexMinified.getContractAndGateway)({
+                        return (0, _index.getContractAndGateway)({
                           username: user.username,
                           chaincode: 'user',
                           contract: 'Keypair'
