@@ -11,35 +11,35 @@ const WALLET_PATH = path.join(__dirname, '..', '..', '..', '..', 'wallet');
  * Each user has a `username` and a `publicKey`.
  */
 export const create = async ({
-	username,
-	publicKey,
+  username,
+  publicKey,
 }) => {
-	return new Promise(async (resolve, reject) => {
-		// create wallet file here
-		const user = await registerUser.main(username).catch(reject);
-    if (!user) return;
-    
-		// get identity
-		const wallet = JSON.parse(fs.readFileSync(path.join(WALLET_PATH, `${username}.id`)));
-	
-		// register username
-		const {contract, gateway} = await 
-			getContractAndGateway({username, chaincode: 'user', contract: 'User'})
+  return new Promise(async (resolve, reject) => {
+    // create wallet file here
+    const user = await registerUser.main(username).catch(reject);
+    if (!user) { return; }
+
+    // get identity
+    const wallet = JSON.parse(fs.readFileSync(path.join(WALLET_PATH, `${username}.id`)));
+
+    // register username
+    const {contract, gateway} = await
+      getContractAndGateway({username, chaincode: 'user', contract: 'User'})
         .catch(reject);
-    
-    if (!contract || !gateway) return;
 
-		const id = await 
-			contract
-				.submitTransaction('createUser', username, publicKey)
-				.catch(reject);
-		
-		await gateway.disconnect();
+    if (!contract || !gateway) { return; }
 
-    if (!id) return;
-    
+    const id = await
+      contract
+        .submitTransaction('createUser', username, publicKey)
+        .catch(reject);
+
+    await gateway.disconnect();
+
+    if (!id) { return; }
+
     console.log('Transaction has been submitted');
-		resolve({wallet, id: id.toString()});
-		return;
-	});
+    resolve({wallet, id: id.toString()});
+    return;
+  });
 };
