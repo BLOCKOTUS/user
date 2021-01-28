@@ -4,7 +4,7 @@ export type UserType = {
     publicKey: string;
     registryDate: number;
     username: string;
-}
+};
 
 export type DIDUrl = string;
 
@@ -62,3 +62,22 @@ export type DidDocumentConstructor = {
     updated?: string;
     blockotus?: any; 
 };
+
+export type ApiCreateArgs = {
+    username: string,
+    publicKey: string,
+};
+
+type Wallet = {
+    credentials: {
+        certificate: string;
+        privateKey: string;
+    }
+    mspId: string;
+    type: string;
+};
+
+export type ApiCreateArgsReturn = Promise<{
+    id: string,
+    wallet: Wallet,
+}>;

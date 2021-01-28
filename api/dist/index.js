@@ -54,7 +54,7 @@ var create = /*#__PURE__*/function () {
             username = _ref.username, publicKey = _ref.publicKey;
             return _context2.abrupt("return", new Promise( /*#__PURE__*/function () {
               var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(resolve, reject) {
-                var user, wallet, _yield$getContractAnd, contract, gateway, id;
+                var appUser, wallet, _yield$getContractAnd, contract, gateway, id;
 
                 return regeneratorRuntime.wrap(function _callee$(_context) {
                   while (1) {
@@ -64,9 +64,9 @@ var create = /*#__PURE__*/function () {
                         return registerUser.main(username)["catch"](reject);
 
                       case 2:
-                        user = _context.sent;
+                        appUser = _context.sent;
 
-                        if (user) {
+                        if (appUser) {
                           _context.next = 5;
                           break;
                         }
@@ -75,7 +75,7 @@ var create = /*#__PURE__*/function () {
 
                       case 5:
                         // get identity
-                        wallet = JSON.parse(_fs["default"].readFileSync(_path["default"].join(WALLET_PATH, "".concat(username, ".id")))); // register username
+                        wallet = JSON.parse(_fs["default"].readFileSync(_path["default"].join(WALLET_PATH, "".concat(username, ".id"))).toString()); // register username
 
                         _context.next = 8;
                         return (0, _index.getContractAndGateway)({
@@ -106,22 +106,18 @@ var create = /*#__PURE__*/function () {
                         return gateway.disconnect();
 
                       case 18:
-                        if (id) {
-                          _context.next = 20;
-                          break;
+                        if (!id) {
+                          reject();
+                        } else {
+                          resolve({
+                            wallet: wallet,
+                            id: id.toString()
+                          });
                         }
 
                         return _context.abrupt("return");
 
                       case 20:
-                        console.log('Transaction has been submitted');
-                        resolve({
-                          wallet: wallet,
-                          id: id.toString()
-                        });
-                        return _context.abrupt("return");
-
-                      case 23:
                       case "end":
                         return _context.stop();
                     }

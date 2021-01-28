@@ -4,6 +4,11 @@ import path from 'path';
 import * as registerUser from '../../../../tools/admins/dist/registerUser.js';
 import { getContractAndGateway } from '../../../helper/api/dist/index.js';
 
+import type {
+  ApiCreateArgs,
+  ApiCreateArgsReturn,
+} from '../../types';
+
 const WALLET_PATH = path.join(__dirname, '..', '..', '..', '..', 'wallet');
 
 /**
@@ -13,14 +18,14 @@ const WALLET_PATH = path.join(__dirname, '..', '..', '..', '..', 'wallet');
 export const create = async ({
   username,
   publicKey,
-}) => {
+}: ApiCreateArgs): ApiCreateArgsReturn => {
   return new Promise(async (resolve, reject) => {
     // create wallet file here
-    const user = await registerUser.main(username).catch(reject);
-    if (!user) { return; }
+    const appUser = await registerUser.main(username).catch(reject);
+    if (!appUser) { return; }
 
     // get identity
-    const wallet = JSON.parse(fs.readFileSync(path.join(WALLET_PATH, `${username}.id`)));
+    const wallet = JSON.parse(fs.readFileSync(path.join(WALLET_PATH, `${username}.id`)).toString());
 
     // register username
     const {contract, gateway} = await
@@ -36,10 +41,14 @@ export const create = async ({
 
     await gateway.disconnect();
 
-    if (!id) { return; }
+    if (!id) { reject(); }
+    else {
+      resolve({
+        wallet, 
+        id: id.toString()
+      });
+    }
 
-    console.log('Transaction has been submitted');
-    resolve({wallet, id: id.toString()});
     return;
   });
 };
