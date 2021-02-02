@@ -4,10 +4,12 @@
 
 'use strict';
 
-import { Context, Contract } from 'fabric-contract-api';
-import type { DidDocumentConstructor, UserType } from '../../../types';
+import { Context } from 'fabric-contract-api';
+import { BlockotusContract } from 'hyperledger-fabric-chaincode-helper';
 
-export class User extends Contract {
+import type { UserType } from '../../../types';
+
+export class User extends BlockotusContract {
 
     public async initLedger() {
         console.log('initLedger');
@@ -30,8 +32,8 @@ export class User extends Contract {
         if (!response.done) { throw new Error(`${params[0]} already exists.`); }
 
         // construct user object
-        const id = await this.getCreatorId(ctx);
-        const registryDate = await this.getTimestamp(ctx);
+        const id = this.getUniqueClientId(ctx);
+        const registryDate = this.getTimestamp(ctx);
         const value = {
             lastJobAttribution: Number(0),
             publicKey: params[1],
@@ -118,26 +120,6 @@ export class User extends Contract {
     }
 
     /**
-     * Get the creatorId (transaction submitter unique id) from the Helper organ.
-     */
-    private async getCreatorId(ctx: Context) {
-        const rawId = await ctx.stub.invokeChaincode('helper', ['getCreatorId'], 'mychannel');
-        if (rawId.status !== 200) { throw new Error(rawId.message); }
-
-        return rawId.payload.toString();
-    }
-
-    /**
-     * Get the timestamp from the Helper organ.
-     */
-    private async getTimestamp(ctx: Context) {
-        const rawTs = await ctx.stub.invokeChaincode('helper', ['getTimestamp'], 'mychannel');
-        if (rawTs.status !== 200) { throw new Error(rawTs.message); }
-
-        return rawTs.payload.toString();
-    }
-
-    /**
      * Retrieve results from an interator.
      * Construct an array, and can respect a length limit.
      */
@@ -181,7 +163,7 @@ export class User extends Contract {
      * Update an array of users object and set the `lastJobAttribution` as of now.
      */
     private async setLastJobAttributionNow(ctx: Context, workers) {
-        const timestamp = await this.getTimestamp(ctx);
+        const timestamp = this.getTimestamp(ctx);
         const promises = [];
 
         workers.forEach((w) => {
@@ -202,7 +184,7 @@ export class User extends Contract {
         this.validateParams(params, 1);
 
         const count = Number(params[0]);
-        const id = await this.getCreatorId(ctx);
+        const id = this.getUniqueClientId(ctx);
         let workersIds = [];
         let workers = [];
 
