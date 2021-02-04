@@ -34,9 +34,7 @@ export class User extends BlockotusContract {
      * @arg pubKey
      */
     public async createUser(ctx: Context) {
-        const args = ctx.stub.getFunctionAndParameters();
-        const params = args.params;
-        this.validateParams(params, 2);
+        const params = this.getParams(ctx, { length: 2 });
 
         const existing = await ctx.stub.getStateByPartialCompositeKey('username~id', [params[0]]);
         const response = await existing.next();
@@ -73,26 +71,13 @@ export class User extends BlockotusContract {
      * @arg {string} key
      */
     public async getUser(ctx: Context): Promise<string> {
-        const args = ctx.stub.getFunctionAndParameters();
-        const params = args.params;
-        this.validateParams(params, 1);
+        const params = this.getParams(ctx, { length: 1 });
 
         // get userId from function argument
         const userId = params[0];
 
         // get user
         return await this.didGet(ctx, userId);
-    }
-
-    /**
-     * Validate the params received as arguments by a public functions.
-     * Params are stored in the Context.
-     * 
-     * @param {string[]} params params received by a pubic function
-     * @param {number} count number of params expected
-     */
-    private validateParams(params: Array<string>, count: number) {
-        if (params.length !== count) { throw new Error(`Incorrect number of arguments. Expecting ${count}. Args: ${JSON.stringify(params)}`); }
     }
 
     /**
@@ -155,9 +140,7 @@ export class User extends BlockotusContract {
      * Select users that will be affected to a job.
      */
     private async getNextWorkersIds(ctx: Context) {
-        const args = ctx.stub.getFunctionAndParameters();
-        const params = args.params;
-        this.validateParams(params, 1);
+        const params = this.getParams(ctx, { length: 1 });
 
         const count = Number(params[0]);
         const id = this.getUniqueClientId(ctx);
