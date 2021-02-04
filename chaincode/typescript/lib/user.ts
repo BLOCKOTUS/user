@@ -20,7 +20,7 @@ export class User extends BlockotusContract {
     /**
      * Cross-contract invokeChaincode() does not support Parent Contract method as far as I know.
      * This is why we duplicate the method here.
-     * Because the method is called from Did contract.
+     * Because the method is called from Did contract https://github.com/BLOCKOTUS/did
      */
     public async did(ctx: Context, subject: string, method: string, data: string): Promise<string> {
         return this.didRequest(ctx, subject, method, data);
