@@ -7,12 +7,23 @@
 import { Context } from 'fabric-contract-api';
 import { BlockotusContract } from 'hyperledger-fabric-chaincode-helper';
 
-import type { UserType } from '../../../types';
-
 export class User extends BlockotusContract {
+
+    constructor(...args) {
+        super(...args);
+    }
 
     public async initLedger() {
         console.log('initLedger');
+    }
+
+    /**
+     * Cross-contract invokeChaincode() does not support Parent Contract method as far as I know.
+     * This is why we duplicate the method here.
+     * Because the method is called from Did contract.
+     */
+    public async did(ctx: Context, subject: string, method: string, data: string): Promise<string> {
+        return this.didRequest(ctx, subject, method, data);
     }
 
     /**
@@ -49,7 +60,7 @@ export class User extends BlockotusContract {
         await ctx.stub.putState(indexUsername, Buffer.from('\u0000'));
 
         // create a composite key for easier search
-        const indexRegistryDate = await ctx.stub.createCompositeKey('registryDate~id', [registryDate, id]);
+        const indexRegistryDate = await ctx.stub.createCompositeKey('registryDate~id', [registryDate.toString(), id]);
         await ctx.stub.putState(indexRegistryDate, Buffer.from('\u0000'));
 
         return id;
@@ -70,42 +81,7 @@ export class User extends BlockotusContract {
         const userId = params[0];
 
         // get user
-        const user = await this.getUserById(ctx, userId);
-
-        return JSON.stringify(user).toString();
-    }
-
-    /**
-     * Executes a did request.
-     */
-    public async didRequest(ctx: Context, subject: string, method: string, data: string): Promise<string> {
-        const parsedSubject: { organ: string, organSpecificId: string } = JSON.parse(subject);
-        const parsedData: any =  data.length > 0 ? JSON.parse(data) : null;
-
-        switch(method){
-            case 'GET':
-                // get user
-                const rawUser = await this.getUserById(ctx, parsedSubject.organSpecificId);
-                const user: UserType = JSON.parse(rawUser);
-                return JSON.stringify({
-                    subject: parsedSubject,
-                    blockotus: user,
-                });
-                break;
-        }
-    }
-
-    /**
-     * Get an user by userId.
-     * 
-     * @param {string} id userId
-     */
-    private async getUserById(ctx: Context, id: string): Promise<string> {
-        const rawUser = await ctx.stub.getState(id);
-        if (!rawUser || rawUser.length === 0) { throw new Error(`${id} does not exist`); }
-
-        const user = rawUser.toString();
-        return user;
+        return await this.didGet(ctx, userId);
     }
 
     /**
