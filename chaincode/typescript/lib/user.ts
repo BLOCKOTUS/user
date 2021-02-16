@@ -81,46 +81,6 @@ export class User extends BlockotusContract {
     }
 
     /**
-     * Retrieve results from an interator.
-     * Construct an array, and can respect a length limit.
-     */
-    private async getAllResults(iterator, isHistory, limit = 0) {
-        const allResults = [];
-        let res = await iterator.next();
-        while (!res.done || (allResults.length < limit && limit > 0)) {
-            if (res.value && res.value.value.toString()) {
-                const jsonRes = {
-                    Key: null,
-                    TxId: null,
-                    Timestamp: null,
-                    Value: null,
-                    Record: null,
-                };
-                if (isHistory && isHistory === true) {
-                    jsonRes.TxId = res.value.tx_id;
-                    jsonRes.Timestamp = res.value.timestamp;
-                    try {
-                        jsonRes.Value = JSON.parse(res.value.value.toString('utf8'));
-                    } catch (err) {
-                        jsonRes.Value = res.value.value.toString('utf8');
-                    }
-                } else {
-                    jsonRes.Key = res.value.key;
-                    try {
-                        jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-                    } catch (err) {
-                        jsonRes.Record = res.value.value.toString('utf8');
-                    }
-                }
-                if (allResults.length < limit) { allResults.push(jsonRes); }
-            }
-            res = await iterator.next();
-        }
-        iterator.close();
-        return allResults;
-    }
-
-    /**
      * Update an array of users object and set the `lastJobAttribution` as of now.
      */
     private async setLastJobAttributionNow(ctx: Context, workers) {
@@ -166,7 +126,7 @@ export class User extends BlockotusContract {
             // Paginated queries are supported only in a read-only transaction
             // const results = await ctx.stub.getQueryResultWithPagination(JSON.stringify(queryString), limit);
             const resultsIterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
-            const workersNonKyc = await this.getAllResults(resultsIterator, false, limit);
+            const workersNonKyc = await this.getAllResultsFromIterator(resultsIterator, false, limit);
 
             workersIds = workersIds.concat(workersNonKyc.map((w) => ({_id: w.Key, publicKey: w.Record.publicKey})));
             workers = workers.concat(workersNonKyc);
