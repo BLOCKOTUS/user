@@ -29,7 +29,7 @@ export const create = async ({
 
     // register username
     const {contract, gateway} = await
-      getContractAndGateway({username, chaincode: 'user', contract: 'User'})
+      getContractAndGateway({ user: { wallet, username }, chaincode: 'user', contract: 'User' })
         .catch(reject);
 
     if (!contract || !gateway) { return; }

@@ -79,7 +79,10 @@ var create = /*#__PURE__*/function () {
 
                         _context.next = 8;
                         return (0, _index.getContractAndGateway)({
-                          username: username,
+                          user: {
+                            wallet: wallet,
+                            username: username
+                          },
                           chaincode: 'user',
                           contract: 'User'
                         })["catch"](reject);
