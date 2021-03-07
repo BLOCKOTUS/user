@@ -106,11 +106,15 @@ export class User extends BlockotusContract {
         const id = this.getUniqueClientId(ctx);
         let workersIds = [];
         let workers = [];
-
+        let workersNonKyc = [];
+        
         // TODO: select KYC workers
-
+        
         // select non-KYC workers
         if (workersIds.length < count) {
+            const limitReal = count - workersIds.length;
+            const limitSample = limitReal * 10;
+
             const queryString = {
                 selector: {
                     $not: { _id: id },
@@ -121,12 +125,18 @@ export class User extends BlockotusContract {
                 ],
             };
 
-            const limit = count - workersIds.length;
-
             // Paginated queries are supported only in a read-only transaction
             // const results = await ctx.stub.getQueryResultWithPagination(JSON.stringify(queryString), limit);
             const resultsIterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
-            const workersNonKyc = await this.getAllResultsFromIterator(resultsIterator, false, limit);
+            const workersNonKycSample = await this.getAllResultsFromIterator(resultsIterator, false, limitSample);
+
+            const sampleRealLength = workersNonKycSample.length;
+            const ratioSize = Math.ceil(sampleRealLength / limitReal);
+
+            workersNonKyc = workersNonKycSample
+                .map((w, i) => i % ratioSize === 0 ? w : null)
+                .filter((o, i) => o !== null)
+                .filter((o, i) => i < limitReal);
 
             workersIds = workersIds.concat(workersNonKyc.map((w) => ({_id: w.Key, publicKey: w.Record.publicKey})));
             workers = workers.concat(workersNonKyc);
