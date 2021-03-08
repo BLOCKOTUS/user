@@ -104,6 +104,9 @@ export class User extends BlockotusContract {
 
         const count = Number(params[0]);
         const id = this.getUniqueClientId(ctx);
+
+        const SAMPLE_FACTOR_SIZE = 10;
+
         let workersIds = [];
         let workers = [];
         let workersNonKyc = [];
@@ -113,7 +116,7 @@ export class User extends BlockotusContract {
         // select non-KYC workers
         if (workersIds.length < count) {
             const limitReal = count - workersIds.length;
-            const limitSample = limitReal * 10;
+            const limitSample = limitReal * SAMPLE_FACTOR_SIZE;
 
             const queryString = {
                 selector: {
