@@ -105,7 +105,7 @@ export class User extends BlockotusContract {
         const count = Number(params[0]);
         const id = this.getUniqueClientId(ctx);
 
-        const SAMPLE_FACTOR_SIZE = 10;
+        const SAMPLE_FACTOR_SIZE = 1;
 
         let workersIds = [];
         let workers = [];
