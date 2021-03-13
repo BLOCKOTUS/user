@@ -65,8 +65,8 @@ export const create = async ({
       fs.writeFileSync(walletPath, JSON.stringify(user.wallet));
 
       // get contract, submit transaction and disconnect
-      const {contract, gateway} = await
-          getContractAndGateway({user, chaincode: 'user', contract: 'User'})
+      const { contract, gateway } = await
+          getContractAndGateway({ user, chaincode: 'user', contract: 'User' })
               .catch(reject);
 
       if (!contract || !gateway) { return; }
