@@ -7,6 +7,7 @@
 import { Context } from 'fabric-contract-api';
 import { BlockotusContract } from 'hyperledger-fabric-chaincode-helper';
 
+type CreatorId = string;
 export class User extends BlockotusContract {
 
     constructor(...args) {
@@ -71,10 +72,8 @@ export class User extends BlockotusContract {
      * @arg {string} key
      */
     public async getUser(ctx: Context): Promise<string> {
-        const params = this.getParams(ctx, { length: 1 });
-
-        // get userId from function argument
-        const userId = params[0];
+        const params = this.getParams(ctx);
+        const userId: CreatorId = params.length === 1 ? params[0] : this.getUniqueClientId(ctx);
 
         // get user
         return await this.didGet(ctx, userId);

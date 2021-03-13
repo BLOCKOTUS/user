@@ -52,3 +52,36 @@ export const create = async ({
     return;
   });
 };
+
+/**
+ * Retrieves a user from the network.
+ */
+ export const get = async ({
+  user,
+}) => {
+  return new Promise(async (resolve, reject) => {
+      // create wallet
+      const walletPath = path.join(WALLET_PATH, `${user.username}.id`);
+      fs.writeFileSync(walletPath, JSON.stringify(user.wallet));
+
+      // get contract, submit transaction and disconnect
+      const {contract, gateway} = await
+          getContractAndGateway({user, chaincode: 'user', contract: 'User'})
+              .catch(reject);
+
+      if (!contract || !gateway) { return; }
+
+      const response = await contract
+        .submitTransaction('getUser')
+        .catch(reject);
+
+      // disconnect
+      await gateway.disconnect();
+
+      if (!response) { return; }
+
+      const parsedResponse = JSON.parse(response.toString('utf8'));
+      resolve(parsedResponse);
+      return;
+  });
+};

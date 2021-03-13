@@ -15,7 +15,7 @@ require("core-js/modules/es.regexp.to-string.js");
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.create = void 0;
+exports.get = exports.create = void 0;
 
 require("regenerator-runtime/runtime.js");
 
@@ -145,5 +145,100 @@ var create = /*#__PURE__*/function () {
     return _ref2.apply(this, arguments);
   };
 }();
+/**
+ * Retrieves a user from the network.
+ */
+
 
 exports.create = create;
+
+var get = /*#__PURE__*/function () {
+  var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(_ref4) {
+    var user;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            user = _ref4.user;
+            return _context4.abrupt("return", new Promise( /*#__PURE__*/function () {
+              var _ref6 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(resolve, reject) {
+                var walletPath, _yield$getContractAnd2, contract, gateway, response, parsedResponse;
+
+                return regeneratorRuntime.wrap(function _callee3$(_context3) {
+                  while (1) {
+                    switch (_context3.prev = _context3.next) {
+                      case 0:
+                        // create wallet
+                        walletPath = _path["default"].join(WALLET_PATH, "".concat(user.username, ".id"));
+
+                        _fs["default"].writeFileSync(walletPath, JSON.stringify(user.wallet)); // get contract, submit transaction and disconnect
+
+
+                        _context3.next = 4;
+                        return (0, _index.getContractAndGateway)({
+                          user: user,
+                          chaincode: 'user',
+                          contract: 'User'
+                        })["catch"](reject);
+
+                      case 4:
+                        _yield$getContractAnd2 = _context3.sent;
+                        contract = _yield$getContractAnd2.contract;
+                        gateway = _yield$getContractAnd2.gateway;
+
+                        if (!(!contract || !gateway)) {
+                          _context3.next = 9;
+                          break;
+                        }
+
+                        return _context3.abrupt("return");
+
+                      case 9:
+                        _context3.next = 11;
+                        return contract.submitTransaction('getUser')["catch"](reject);
+
+                      case 11:
+                        response = _context3.sent;
+                        _context3.next = 14;
+                        return gateway.disconnect();
+
+                      case 14:
+                        if (response) {
+                          _context3.next = 16;
+                          break;
+                        }
+
+                        return _context3.abrupt("return");
+
+                      case 16:
+                        parsedResponse = JSON.parse(response.toString('utf8'));
+                        resolve(parsedResponse);
+                        return _context3.abrupt("return");
+
+                      case 19:
+                      case "end":
+                        return _context3.stop();
+                    }
+                  }
+                }, _callee3);
+              }));
+
+              return function (_x5, _x6) {
+                return _ref6.apply(this, arguments);
+              };
+            }()));
+
+          case 2:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+
+  return function get(_x4) {
+    return _ref5.apply(this, arguments);
+  };
+}();
+
+exports.get = get;
