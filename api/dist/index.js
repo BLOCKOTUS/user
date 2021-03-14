@@ -171,54 +171,51 @@ var get = /*#__PURE__*/function () {
                         // create wallet
                         walletPath = _path["default"].join(WALLET_PATH, "".concat(user.username, ".id"));
 
-                        _fs["default"].writeFileSync(walletPath, JSON.stringify(user.wallet));
+                        _fs["default"].writeFileSync(walletPath, JSON.stringify(user.wallet)); // get contract, submit transaction and disconnect
 
-                        console.log({
-                          user: user
-                        }); // get contract, submit transaction and disconnect
 
-                        _context3.next = 5;
+                        _context3.next = 4;
                         return (0, _index.getContractAndGateway)({
                           user: user,
                           chaincode: 'user',
                           contract: 'User'
                         })["catch"](reject);
 
-                      case 5:
+                      case 4:
                         _yield$getContractAnd2 = _context3.sent;
                         contract = _yield$getContractAnd2.contract;
                         gateway = _yield$getContractAnd2.gateway;
 
                         if (!(!contract || !gateway)) {
-                          _context3.next = 10;
+                          _context3.next = 9;
                           break;
                         }
 
                         return _context3.abrupt("return");
 
-                      case 10:
-                        _context3.next = 12;
+                      case 9:
+                        _context3.next = 11;
                         return contract.submitTransaction('getUser')["catch"](reject);
 
-                      case 12:
+                      case 11:
                         response = _context3.sent;
-                        _context3.next = 15;
+                        _context3.next = 14;
                         return gateway.disconnect();
 
-                      case 15:
+                      case 14:
                         if (response) {
-                          _context3.next = 17;
+                          _context3.next = 16;
                           break;
                         }
 
                         return _context3.abrupt("return");
 
-                      case 17:
+                      case 16:
                         parsedResponse = JSON.parse(response.toString('utf8'));
                         resolve(parsedResponse);
                         return _context3.abrupt("return");
 
-                      case 20:
+                      case 19:
                       case "end":
                         return _context3.stop();
                     }

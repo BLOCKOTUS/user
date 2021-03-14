@@ -29,7 +29,7 @@ export class User extends BlockotusContract {
 
     /**
      * Create a user.
-     * 
+     *
      * @param {Context} ctx
      * @arg username
      * @arg pubKey
@@ -67,7 +67,7 @@ export class User extends BlockotusContract {
 
     /**
      * Get a user.
-     * 
+     *
      * @param {Context} ctx
      * @arg {string} key
      */
@@ -109,9 +109,9 @@ export class User extends BlockotusContract {
         let workersIds = [];
         let workers = [];
         let workersNonKyc = [];
-        
+
         // TODO: select KYC workers
-        
+
         // select non-KYC workers
         if (workersIds.length < count) {
             const limitReal = count - workersIds.length;

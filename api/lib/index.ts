@@ -44,7 +44,7 @@ export const create = async ({
     if (!id) { reject(); }
     else {
       resolve({
-        wallet, 
+        wallet,
         id: id.toString()
       });
     }
